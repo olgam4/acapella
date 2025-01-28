@@ -1,0 +1,13 @@
+html {
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+.buffer {
+  width: 100%;
+  height: 200px;
+}
+
+body {
+  overflow: hidden;
+}

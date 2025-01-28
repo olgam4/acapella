@@ -1,0 +1,45 @@
+{
+  "name": "audio",
+  "version": "0.1.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "tauri": "tauri",
+    "ios": "tauri ios dev 'iPhone 16'",
+    "iphone": "tauri ios dev",
+    "testflight": "bun tauri ios build --export-method release-testing"
+  },
+  "license": "WTFPL",
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-fs": "~2",
+    "@tauri-apps/plugin-log": "~2",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-sql": "~2",
+    "@types/howler": "^2.2.12",
+    "@types/md5": "^2.3.5",
+    "howler": "^2.2.4",
+    "iconify-icon": "^2.3.0",
+    "md5": "^2.3.0",
+    "minisearch": "^7.1.1",
+    "nanoid": "^5.0.9",
+    "svelte-gestures": "^5.1.3",
+    "svelte-tiny-virtual-list": "^2.1.2",
+    "worker-timers": "^8.0.13"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^3.0.6",
+    "@sveltejs/kit": "^2.9.0",
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.3",
+    "@tauri-apps/cli": "^2"
+  }
+}
