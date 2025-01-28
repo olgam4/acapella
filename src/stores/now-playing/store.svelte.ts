@@ -1,9 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
-import { clearInterval, setInterval } from 'worker-timers';
-
 import type { Album, Song } from "../music/music";
 import { updateRecentlyPlayed, url } from "../music/store.svelte";
 import { next, queue } from "../queue/store.svelte";
+import { setInterval, clearInterval } from "worker-timers";
 
 class NowPlaying {
   acappellaId: string | undefined = $derived.by(() => this.song?.acappellaId)
@@ -61,12 +60,13 @@ class NowPlaying {
 
   async play() {
     this.interval = setInterval(() => {
-      this.position += 1
+      this.position += 2
+      console.log(this.position, '/', this.duration)
       if (this.position >= this.duration) {
-        this.reset()
+        console.log('next')
         next();
       }
-    }, 1000)
+    }, 2000)
 
     this.playing = true
 
@@ -81,8 +81,10 @@ class NowPlaying {
 
   pause() {
     this.clearInterval()
+
     this.playing = false
     this.#paused = true
+
     invoke("pause_audio")
   }
 
@@ -92,6 +94,7 @@ class NowPlaying {
     this.playing = false
     this.#paused = false
     this.position = 0
+
     invoke("reset_audio")
   }
 

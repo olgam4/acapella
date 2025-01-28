@@ -39,7 +39,7 @@
     <label>
       <p>Artists</p>
       {#if getLoading().loadingArtists}
-        <iconify-icon icon="line-md:loading-twotone-loop"> </iconify-icon>
+        <input value="?" disabled />
       {:else}
         <input value={getArtists().length} disabled />
       {/if}
@@ -47,7 +47,7 @@
     <label>
       <p>Albums</p>
       {#if getLoading().loadingAlbums}
-        <iconify-icon icon="line-md:loading-twotone-loop"> </iconify-icon>
+        <input value="?" disabled />
       {:else}
         <input value={getAlbums().length} disabled />
       {/if}
@@ -55,7 +55,7 @@
     <label>
       <p>Songs</p>
       {#if getLoading().loadingSongs}
-        <iconify-icon icon="line-md:loading-twotone-loop"> </iconify-icon>
+        <input value="?" disabled />
       {:else}
         <input value={getSongs().length} disabled />
       {/if}

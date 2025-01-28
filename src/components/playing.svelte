@@ -137,13 +137,7 @@
   }
 </script>
 
-<audio
-  bind:this={audio}
-  ontimeupdate={(e) => (nowPlaying.position = e.currentTarget.currentTime)}
-  onended={() => {
-    next();
-  }}
-></audio>
+<audio bind:this={audio}></audio>
 
 {#if fullscreen}
   <main

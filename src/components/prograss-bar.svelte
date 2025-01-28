@@ -24,6 +24,8 @@
       height: 100%;
       background-color: var(--secondary-color);
       border-radius: 999px;
+
+      transition: width 2s;
     }
   }
 </style>
