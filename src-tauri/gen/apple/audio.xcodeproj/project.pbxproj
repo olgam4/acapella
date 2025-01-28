@@ -19,6 +19,7 @@
 		DEF29FCB2D76833B6191297F /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87F8A4C4CC8221E5A1542250 /* QuartzCore.framework */; };
 		E1D7EF6EDD9E93E4248D7E26 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CF65EF41D2DEF1B9B680333 /* CoreGraphics.framework */; };
 		EBEC08782D494F900077C942 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBEC08772D494F900077C942 /* AudioToolbox.framework */; };
+		EBEC087A2D49506F0077C942 /* AVFAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBEC08792D49506F0077C942 /* AVFAudio.framework */; };
 		FCF5867F086512BC31EA792C /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C587464E12A93D5C15D55F1 /* Metal.framework */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +42,7 @@
 		D9D156C965D51DABB359C1B9 /* libapp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libapp.a; sourceTree = "<group>"; };
 		E84B1A7ACAFB42483F6208EF /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		EBEC08772D494F900077C942 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		EBEC08792D49506F0077C942 /* AVFAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFAudio.framework; path = System/Library/Frameworks/AVFAudio.framework; sourceTree = SDKROOT; };
 		EC9C25371233E127D9CE7965 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -58,6 +60,7 @@
 				0E2004E2DD28D8F016518218 /* Security.framework in Frameworks */,
 				1EC33DBDA392DD692D3E1409 /* UIKit.framework in Frameworks */,
 				B96A3491812BDDC5F25430E0 /* WebKit.framework in Frameworks */,
+				EBEC087A2D49506F0077C942 /* AVFAudio.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +85,7 @@
 		111D10863A1F6C27136D3544 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				EBEC08792D49506F0077C942 /* AVFAudio.framework */,
 				EBEC08772D494F900077C942 /* AudioToolbox.framework */,
 				7CF65EF41D2DEF1B9B680333 /* CoreGraphics.framework */,
 				D9D156C965D51DABB359C1B9 /* libapp.a */,
@@ -334,6 +338,7 @@
 					"\".\"",
 				);
 				INFOPLIST_FILE = audio_iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -443,6 +448,7 @@
 					"\".\"",
 				);
 				INFOPLIST_FILE = audio_iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
