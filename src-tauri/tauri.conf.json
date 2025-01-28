@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Acapella",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "identifier": "com.gamachexx.audio.app",
   "build": {
     "beforeDevCommand": "bun run dev",
@@ -18,6 +18,14 @@
       }
     ],
     "security": {
+      "headers": {
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Embedder-Policy": "require-corp",
+        "Timing-Allow-Origin": [
+          "https://favicone.com",
+          "tauri://localhost"
+        ]
+      },
       "csp": null
     }
   },

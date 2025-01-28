@@ -223,7 +223,6 @@ async fn cast_audio(audio_source: String) -> Result<(), String> {
 
 #[tauri::command]
 async fn play_audio(audio_source: String) -> Result<(), String> {
-
     match SINK.lock().unwrap().as_ref() {
         Some(sink) => {
             sink.pause();

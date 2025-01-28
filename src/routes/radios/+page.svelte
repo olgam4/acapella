@@ -15,6 +15,11 @@
         "internetRadioStation"
       ];
   });
+
+  const getFavicon = (url: string) => {
+    const path = new URL(url).host.replace("www.", "");
+    return `https://www.faviconextractor.com/favicon/${path}`;
+  };
 </script>
 
 <main>
@@ -29,8 +34,13 @@
             nowPlaying.removeSong();
             audio.src = station.streamUrl;
             audio.play();
-          }}>{station.name}</button
+          }}
         >
+          <div class="image-container">
+            <img alt="radio logo" src={getFavicon(station.homePageUrl)} />
+          </div>
+          {station.name}
+        </button>
       </li>
     {/each}
   </ul>
@@ -62,11 +72,19 @@
     margin-block: 0.5rem;
 
     li {
-      padding: 0.5rem;
-
       button {
+        display: flex;
+        padding: 0.5rem;
+        align-items: center;
         width: 100%;
         height: 100%;
+
+        .image-container {
+          display: flex;
+
+          margin-right: 0.5rem;
+          width: 2rem;
+        }
       }
     }
   }

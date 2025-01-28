@@ -9,6 +9,11 @@ export default defineConfig(async () => ({
 
   clearScreen: false,
   server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Timing-Allow-Origin': ' https://favicone.com tauri://localhost',
+    },
     port: 1420,
     strictPort: true,
     host: host || false,
