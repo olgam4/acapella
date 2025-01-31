@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    getMostPlayed,
     getRandomAlbums,
     getRandomArtists,
     getRandomSongs,

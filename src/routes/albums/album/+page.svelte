@@ -1,13 +1,14 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
-  import type { Album } from "../../../stores/music/music";
+  import type { Album, Song } from "../../../stores/music/music";
   import { getAlbum, url } from "../../../stores/music/store.svelte";
   import {
     nowPlaying,
-    play,
     playAlbum,
   } from "../../../stores/now-playing/store.svelte";
+
+  let menu: HTMLElement | undefined = $state();
 
   const albumId = page.url.searchParams.get("id") as string;
 
@@ -25,6 +26,9 @@
 </script>
 
 <main>
+  <button class="back" onclick={() => history.back()} aria-label="back"
+    ><iconify-icon icon="carbon:chevron-left"></iconify-icon></button
+  >
   <div class="image-container">
     <img src={url("getCoverArt", [`id=${album.coverArt}`])} alt={album.name} />
   </div>
@@ -35,7 +39,7 @@
   <p class="info">{year} ⦁ {songQty} song{songQty > 1 ? "s" : ""}</p>
   <ul>
     {#each album.songs as song}
-      <li class="song">
+      <li class="song" style={`anchor-name: --${song.id};`}>
         <button class="song-name" onclick={() => playAlbum(song, album)}>
           {#if isPlaying(song.acappellaId)}
             <div class="synth">
@@ -53,10 +57,16 @@
       </li>
     {/each}
   </ul>
+  <div bind:this={menu} class="context-menu"></div>
   <div class="buffer"></div>
 </main>
 
 <style scoped>
+  .back {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+  }
+
   .info {
     color: var(--gray);
     font-size: 0.9rem;

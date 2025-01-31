@@ -59,21 +59,27 @@ class NowPlaying {
   }
 
   async play() {
-    this.interval = setInterval(() => {
-      this.position += 2
-      console.log(this.position, '/', this.duration)
-      if (this.position >= this.duration) {
-        console.log('next')
+    this.playing = true
+
+    this.interval = setInterval(async () => {
+      this.position += 1
+      const timeRemaining = await invoke('time_remaining')
+      if (!timeRemaining && this.position >= 15) {
         next();
       }
-    }, 2000)
-
-    this.playing = true
+    }, 1000)
 
     if (this.#paused) {
       await invoke("resume_audio")
     } else {
-      await invoke("play_audio", { audioSource: this.source })
+      await invoke("play_audio", {
+        audioSource: this.source,
+        artist: this.song?.artist,
+        album: this.song?.album,
+        title: this.song?.title,
+        cover: this.coverArtSource,
+        duration: this.song?.duration.toString(),
+      })
     }
 
     this.#paused = false

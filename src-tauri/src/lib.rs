@@ -20,12 +20,6 @@ const SERVICE_NAME: &'static str = "_googlecast._tcp.local";
 static MEDIA_CONTROLLER: Lazy<Mutex<Option<MediaController>>> = Lazy::new(|| Mutex::new(None));
 static SINK: Lazy<Mutex<Option<Arc<rodio::Sink>>>> = Lazy::new(|| Mutex::new(None));
 
-// struct AppData {
-//     media_controller: Option<Arc<MediaController>>,
-//     sink: Option<Arc<rodio::Sink>>,
-//     handle: Option<Arc<tokio::task::JoinHandle<Result<(), String>>>>,
-// }
-
 struct NamedCastDevice {
     name: String,
     addr: IpAddr,
@@ -221,8 +215,55 @@ async fn cast_audio(audio_source: String) -> Result<(), String> {
     Ok(())
 }
 
+fn set_media(artist: String, album: String, title: String, cover: String, duration: String) {
+    unsafe {
+        let shared_instance = AVAudioSession::shared_instance();
+        shared_instance.activate();
+
+        let default = objc2_media_player::MPNowPlayingInfoCenter::defaultCenter();
+        objc2_media_player::MPNowPlayingInfoCenter::setNowPlayingInfo(&*default, {
+            let keys = &[
+                objc2_media_player::MPMediaItemPropertyArtist,
+                objc2_media_player::MPMediaItemPropertyAlbumTitle,
+                objc2_media_player::MPMediaItemPropertyTitle,
+                objc2_media_player::MPMediaItemPropertyAssetURL,
+                objc2_media_player::MPMediaItemPropertyPlaybackDuration,
+            ];
+            let owned_objects: &[objc2::rc::Retained<objc2::runtime::AnyObject>] = &[
+                objc2::rc::Retained::into_super(objc2::rc::Retained::into_super(
+                    objc2_foundation::NSString::from_str(&artist),
+                )),
+                objc2::rc::Retained::into_super(objc2::rc::Retained::into_super(
+                    objc2_foundation::NSString::from_str(&album),
+                )),
+                objc2::rc::Retained::into_super(objc2::rc::Retained::into_super(
+                    objc2_foundation::NSString::from_str(&title),
+                )),
+                objc2::rc::Retained::into_super(objc2::rc::Retained::into_super(
+                    objc2_foundation::NSString::from_str(&cover),
+                )),
+                objc2::rc::Retained::into_super(objc2::rc::Retained::into_super(
+                    objc2_foundation::NSString::from_str(&duration),
+                )),
+            ];
+            Some(&objc2_foundation::NSDictionary::from_retained_objects(
+                keys,
+                owned_objects,
+            ))
+        });
+    }
+}
+
 #[tauri::command]
-async fn play_audio(audio_source: String) -> Result<(), String> {
+async fn play_audio(
+    audio_source: String,
+    artist: String,
+    album: String,
+    title: String,
+    cover: String,
+    duration: String,
+) -> Result<(), String> {
+    log::info!("Playing audio");
     match SINK.lock().unwrap().as_ref() {
         Some(sink) => {
             sink.pause();
@@ -231,6 +272,8 @@ async fn play_audio(audio_source: String) -> Result<(), String> {
         }
         None => (),
     }
+
+    set_media(artist, album, title, cover, duration);
 
     let reader = match StreamDownload::new_http(
         audio_source.parse().unwrap(),
@@ -256,6 +299,8 @@ async fn play_audio(audio_source: String) -> Result<(), String> {
 
     let result = handle.await;
 
+    log::info!("Audio started");
+
     match result {
         Ok(Ok(_)) => Ok(()),
         Ok(Err(e)) => Err(e.to_string()),
@@ -270,6 +315,8 @@ async fn pause_audio() -> Result<(), String> {
         None => (),
     }
 
+    log::info!("Paused audio");
+
     Ok(())
 }
 
@@ -279,6 +326,8 @@ async fn resume_audio() -> Result<(), String> {
         Some(sink) => sink.play(),
         None => (),
     }
+
+    log::info!("Resumed audio");
 
     Ok(())
 }
@@ -292,7 +341,19 @@ async fn reset_audio() -> Result<(), String> {
         None => (),
     }
 
+    log::info!("Reset audio");
+
     Ok(())
+}
+
+#[tauri::command]
+async fn time_remaining() -> Result<bool, String> {
+    log::info!("Time remaining");
+
+    match SINK.lock().unwrap().as_ref() {
+        Some(sink) => Ok(!sink.empty()),
+        None => Ok(true),
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -402,6 +463,7 @@ pub fn run() {
             pause_audio,
             resume_audio,
             reset_audio,
+            time_remaining,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -51,10 +51,27 @@
       scrollToIndex = index === -1 ? 0 : index;
     }
   };
+  
+  const dragOnIndex = (e: TouchEvent) => {
+    const element = document.elementFromPoint(
+      e.touches[0].clientX,
+      e.touches[0].clientY,
+    );
+    if (!element) return;
+    const letter = element.getAttribute("data-letter");
+    if (!letter) return;
+
+    getIndexOfFirstElementStartingWithLetter(
+      element.getAttribute("data-letter") as string,
+    );
+  };
 </script>
 
 <main>
-  <h1>Artists</h1>
+  <button
+  onclick={() => history.back()}
+    ><h1><iconify-icon icon="carbon:chevron-left"></iconify-icon> Artists</h1></button
+  >
   <div class="list">
     <VirtualList
       height={height - 140}
@@ -76,11 +93,11 @@
         {/if}
       </div>
     </VirtualList>
-    <div class="index">
+    <div class="index" ontouchmove={dragOnIndex}>
       {#each letters as letter}
         <div>
           <button
-            ontouchstart={() => getIndexOfFirstElementStartingWithLetter(letter)}
+            data-letter={letter}
             class="letter">{letter}</button
           >
         </div>
@@ -96,6 +113,8 @@
   }
 
   h1 {
+    display: flex;
+    align-items: center;
     font-size: 2rem;
     margin-block: 0.5rem;
     font-weight: 600;

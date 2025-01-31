@@ -68,6 +68,12 @@ class Settings {
 
     await this.save()
   }
+
+  reset() {
+    this.#server = ''
+    this.#u = ''
+    this.#p = ''
+  }
 }
 
 export const settings = $state(new Settings())

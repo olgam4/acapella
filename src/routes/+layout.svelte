@@ -1,11 +1,11 @@
 <script lang="ts">
+  import "@oddbird/css-anchor-positioning";
   import type { LayoutProps } from "./$types";
   import NowPlaying from "../components/playing.svelte";
   import { swipe, type SwipeCustomEvent } from "svelte-gestures";
   import { page } from "$app/state";
   import { settings } from "../stores/settings/store.svelte";
-  import { goto } from "$app/navigation";
-    import Login from "../components/login.svelte";
+  import Login from "../components/login.svelte";
 
   function handler(event: SwipeCustomEvent) {
     const direction = event.detail.direction;

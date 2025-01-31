@@ -12,6 +12,7 @@ let artists = $state([] as Array<Artist>),
   loadingArtists = $state(false),
   loadingAlbums = $state(false),
   loadingSongs = $state(false),
+  mostPlayed = $state([] as Array<Album>),
   recentlyPlayed = $state([] as Array<Album>);
 
 export async function doScan() {
@@ -33,6 +34,7 @@ export async function doScan() {
   artists = artistIds;
   artists.sort((a, b) => a["name"].localeCompare(b["name"]));
 
+
   const albumPromises = artistIds.map((artist: any) =>
     fetch(url("getArtist", [`id=${artist["id"]}`])),
   );
@@ -42,7 +44,11 @@ export async function doScan() {
   );
   const albumIds = albumsData.reduce((acc, albumData) => {
     const albums = albumData["subsonic-response"]["artist"]["album"];
-    return acc.concat(albums);
+    if (!albums) {
+      return acc;
+    }
+    const concatenatedAlbums = acc.concat(albums);
+    return concatenatedAlbums;
   }, [] as Array<Album>);
 
   loadingAlbums = false;
@@ -236,7 +242,7 @@ export async function loadFromDB() {
   });
 
   const artistAlbums = artistsBD.map((artist: Artist) => {
-    artist["albums"] = artistAlbumsMap[artist["id"]].map((albumId: string) => albumsBD.find((album: Album) => album["id"] === albumId)) || [];
+    artist["albums"] = artistAlbumsMap[artist["id"]]?.map((albumId: string) => albumsBD.find((album: Album) => album["id"] === albumId)) || [];
     return artist;
   });
 
@@ -248,11 +254,15 @@ export async function loadFromDB() {
   loadingAlbums = false;
   loadingSongs = false;
 
-  const results = await db.select<any[]>(
+  const recentPlayedResults = await db.select<any[]>(
     "SELECT * FROM recently_played ORDER BY playedAt DESC",
   );
-  const albumIds = results.map((album) => album.albumId) as string[];
-  recentlyPlayed = keepOnlyFirstInstance(getAlbumsBy(albumIds));
+
+  const albumIds = recentPlayedResults.map((album) => album.albumId) as string[];
+  recentlyPlayed = getAlbumsBy(keepOnlyFirstInstance(albumIds));
+
+  const mostPlayedByIds = albums.reduce(reduceToMostPlayedAlbums, {})
+  mostPlayed = getAlbumsBy(Object.keys(mostPlayedByIds).sort((a, b) => mostPlayedByIds[b] - mostPlayedByIds[a]));
 
   albums.sort((a: Album, b: Album) => a["name"].localeCompare(b["name"]));
   artists.sort((a: Artist, b: Artist) => a["name"].localeCompare(b["name"]));
@@ -260,13 +270,21 @@ export async function loadFromDB() {
   db.close();
 }
 
+export function reduceToMostPlayedAlbums(acc: { [key: string]: number }, album: Album) {
+  if (!acc[album["id"]]) {
+    acc[album["id"]] = 0;
+  }
+  acc[album["id"]] += 1;
+  return acc;
+}
+
 export async function updateRecentlyPlayed(song: Song) {
   const db = await Database.load("sqlite:music.db");
   await db.execute("INSERT INTO recently_played (playedAt, songId, albumId, artistId) VALUES ($1, $2, $3, $4)", [new Date().toISOString(), song.id, song.albumId, song.artistId])
   await db.close()
 
-  recentlyPlayed = getAlbumsBy([song.albumId]).concat(recentlyPlayed);
-  recentlyPlayed = keepOnlyFirstInstance(recentlyPlayed);
+  const albums = getAlbumsBy([song.albumId]).concat(recentlyPlayed);
+  recentlyPlayed = keepOnlyFirstInstance(albums);
 }
 
 function keepOnlyFirstInstance(array: Array<any>) {
@@ -313,12 +331,16 @@ export function getRandomSongs() {
   return randomSongsIdxs.map((idx) => songs[idx]);
 }
 
-export function getAlbumsBy(ids: string[]) {
-  return albums.filter((album) => ids.includes(album["id"]));
+export function getAlbumsBy(ids: string[]): Album[] {
+  return ids.map((id) => albums.find((album) => album["id"] === id)).filter((album) => album !== undefined);
 }
 
 export function getRecentlyPlayed() {
   return recentlyPlayed;
+}
+
+export function getMostPlayed() {
+  return mostPlayed;
 }
 
 export function getArtists() {

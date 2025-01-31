@@ -75,6 +75,13 @@
     />
   </div>
 
+  {#if searchTerm === ""}
+    <div class="search-holder">
+      <iconify-icon icon="mingcute:mic-2-line"></iconify-icon>
+      <p>Search for a song, album or artist</p>
+    </div>
+  {/if}
+
   {#if searchTerm}
     <div class="results">
       {#if songs.length > 0}
@@ -133,10 +140,7 @@
           {#each artists as artist}
             <li>
               <div class="image-container">
-                <img
-                  src={artist.artistImageUrl}
-                  alt={artist.name}
-                />
+                <img src={artist.artistImageUrl} alt={artist.name} />
               </div>
               <button onclick={() => goto(`/artists/artist?id=${artist.id}`)}>
                 <p>{artist.name}</p>
@@ -182,6 +186,22 @@
     margin: 0.5rem;
     font-size: 0.8rem;
     color: var(--gray);
+  }
+
+  .search-holder {
+    margin-block-start: 15rem;
+    pointer-events: none;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray);
+    font-size: 0.8rem;
+
+    [icon] {
+      font-size: 4rem;
+    }
   }
 
   li {

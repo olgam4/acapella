@@ -7,6 +7,7 @@
     doScan,
   } from "../../stores/music/store.svelte";
   import { settings } from "../../stores/settings/store.svelte";
+  import { getVersion } from "@tauri-apps/api/app";
 
   let loading = $derived(() => getLoading().loadingSongs);
   let password = $state("");
@@ -15,6 +16,16 @@
 
 <main>
   <h1>Settings</h1>
+  <h2>ACAPELLA</h2>
+  <form>
+    <label>
+      <p>Version</p>
+      {#await getVersion() then value}
+        <input value={value} disabled />
+      {/await}
+    </label>
+  </form>
+  <h2>SERVER DETAILS</h2>
   <form>
     <label>
       <p>Server URL</p>
@@ -35,6 +46,7 @@
     </label>
   </form>
 
+  <h2>SYNC</h2>
   <form>
     <label>
       <p>Artists</p>
@@ -68,6 +80,15 @@
       </button>
     </div>
   </form>
+  <form>
+    <div class="action">
+      <button onclick={settings.reset}>
+        {#if loading()}
+          <iconify-icon icon="line-md:loading-twotone-loop"> </iconify-icon>
+        {:else}Log out{/if}
+      </button>
+    </div>
+  </form>
 </main>
 
 <style scoped>
@@ -77,6 +98,10 @@
       font-size: 2rem;
       margin-block-start: 0.5rem;
       font-weight: 600;
+    }
+
+    h2 {
+      color: var(--secondary-off-color);
     }
 
     padding: 1rem;

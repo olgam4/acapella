@@ -6,24 +6,7 @@
   import PrograssBar from "./prograss-bar.svelte";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { crossfade, fade, fly, scale, slide } from "svelte/transition";
-
-  let audio: HTMLAudioElement | undefined = $state();
-
-  $effect(() => {
-    if (!audio) return;
-    audio.src = nowPlaying.sourceMp3;
-
-    playAudio();
-  });
-
-  const playAudio = () => {
-    if (!audio) return;
-    try {
-      audio.load();
-      audio.play();
-    } catch (error) {}
-  };
+  import { fade, fly, scale, slide } from "svelte/transition";
 
   const metadata = $derived.by(() => {
     if (!nowPlaying.song) return null;
@@ -91,12 +74,10 @@
 
   function start() {
     nowPlaying.play();
-    playAudio();
   }
 
   function pause() {
     nowPlaying.pause();
-    playAudio();
   }
 
   function back() {
@@ -136,8 +117,6 @@
     return queue.length > 0;
   }
 </script>
-
-<audio bind:this={audio}></audio>
 
 {#if fullscreen}
   <main

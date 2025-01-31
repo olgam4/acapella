@@ -42,5 +42,9 @@ tokio = "1.43.0"
 
 stream-download = "0.14.1"
 rodio = "0.20.1"
-avfaudio = "0.0.2"
+avfaudio = { git = "https://github.com/olgam4/avfaudio-rs.git" }
 reqwest = "0.12.12"
+
+objc2-media-player = "0.3.0"
+objc2-foundation = "0.3.0"
+objc2 = "0.6.0"

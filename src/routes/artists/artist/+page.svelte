@@ -22,12 +22,20 @@
 
   const queueArist = () => {
     queue.clear();
-    queue.enqueue(artist.albums.flatMap((album) => album.songs).sort(() => 0.5 - Math.random()));
+    queue.enqueue(
+      artist.albums
+        .flatMap((album) => album.songs)
+        .sort(() => 0.5 - Math.random()),
+    );
     next();
   };
 </script>
 
 <main>
+  <button class="back" onclick={() => history.back()} aria-label="back"
+    ><iconify-icon icon="carbon:chevron-left"></iconify-icon></button
+  >
+
   <div class="image-container">
     <img src={artist.artistImageUrl} alt={artist.name} />
   </div>
@@ -69,6 +77,11 @@
 </main>
 
 <style scoped>
+  .back {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+  }
+
   main {
     margin: 12px;
   }

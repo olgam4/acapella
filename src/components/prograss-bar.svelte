@@ -25,7 +25,7 @@
       background-color: var(--secondary-color);
       border-radius: 999px;
 
-      transition: width 2s;
+      transition: width 2;
     }
   }
 </style>
