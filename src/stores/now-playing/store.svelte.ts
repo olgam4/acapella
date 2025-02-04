@@ -3,6 +3,7 @@ import type { Album, Song } from "../music/music";
 import { updateRecentlyPlayed, url } from "../music/store.svelte";
 import { next, queue } from "../queue/store.svelte";
 import { setInterval, clearInterval } from "worker-timers";
+import { listen } from "@tauri-apps/api/event";
 
 class NowPlaying {
   acappellaId: string | undefined = $derived.by(() => this.song?.acappellaId)
@@ -10,6 +11,7 @@ class NowPlaying {
   #playing: boolean = $state(false)
   #paused: boolean = $state(false)
   #position: number = $state(0)
+  #scrobbled: boolean = $state(false)
   #duration: number = $derived.by(() => this.song?.duration || 0)
   #source: string = $derived.by(() => url("stream", [`id=${this.#song?.id}`, `format=raw`]))
   #coverArtSource: string = $derived.by(() => url("getCoverArt", [`id=${this.#song?.coverArt}`]))
@@ -66,6 +68,12 @@ class NowPlaying {
       const timeRemaining = await invoke('time_remaining')
       if (!timeRemaining && this.position >= 15) {
         next();
+        this.playing = false
+      }
+
+      if (this.position >= (this.song?.duration || 30) / 2 && !this.#scrobbled) {
+        await fetch(url("scrobble", [`id=${this.song?.id}`, `submission=true`]))
+        this.#scrobbled = true
       }
     }, 1000)
 
@@ -99,6 +107,7 @@ class NowPlaying {
 
     this.playing = false
     this.#paused = false
+    this.#scrobbled = false
     this.position = 0
 
     invoke("reset_audio")
@@ -133,3 +142,15 @@ export function playAlbum(song: Song, album: Album) {
   const songsAfterCurrent = album.songs.slice(album.songs.indexOf(song) + 1)
   queue.enqueue(songsAfterCurrent)
 }
+
+listen("next-track", () => {
+  next();
+})
+
+listen("play", () => {
+  nowPlaying.play();
+})
+
+listen("pause", () => {
+  nowPlaying.pause();
+})

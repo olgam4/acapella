@@ -1,6 +1,6 @@
 {
   "productName": "Acapella",
-  "version": "0.4.9",
+  "version": "0.6.5",
   "identifier": "com.gamachexx.audio.app",
   "build": {
     "beforeDevCommand": "bun run dev",

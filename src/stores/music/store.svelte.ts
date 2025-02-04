@@ -23,6 +23,8 @@ export async function doScan() {
   const artistsResponse = await fetch(url("getArtists"));
   const artistsData = await artistsResponse.json();
 
+  console.log(artistsData);
+
   const artistIds = (
     artistsData["subsonic-response"]["artists"]["index"] as Array<any>
   ).reduce((acc, index) => {
@@ -74,10 +76,11 @@ export async function doScan() {
     const sogns = tracksData.reduce((acc: any, trackData: any) => {
       const sogns = trackData["subsonic-response"]["album"]["song"];
 
-      sogns.forEach((song: any) => {
+      sogns?.forEach((song: any) => {
         song["acappellaId"] = nanoid();
       })
-      return acc.concat(sogns);
+      const concatenatedSogns = sogns ? acc.concat(sogns) : acc;
+      return concatenatedSogns;
     }, []);
     data.push(...sogns);
   }
@@ -219,7 +222,7 @@ export async function loadFromDB() {
   const artistAlbumsBD = await db.select("SELECT * from artist_albums") as any[];
   const albumSongsBD = await db.select("SELECT * from album_songs") as any[];
 
-  const artistAlbumsMap = artistAlbumsBD.reduce((acc: any, artistAlbum: any) => {
+  const artistAlbumsMap = artistAlbumsBD?.reduce((acc: any, artistAlbum: any) => {
     if (!acc[artistAlbum["artistId"]]) {
       acc[artistAlbum["artistId"]] = [];
     }
@@ -227,7 +230,7 @@ export async function loadFromDB() {
     return acc;
   }, {});
 
-  const albumSongsMap = albumSongsBD.reduce((acc: any, albumSong: any) => {
+  const albumSongsMap = albumSongsBD?.reduce((acc: any, albumSong: any) => {
     if (!acc[albumSong["albumId"]]) {
       acc[albumSong["albumId"]] = [];
     }
@@ -236,12 +239,12 @@ export async function loadFromDB() {
   }, {});
 
 
-  const albumSongs = albumsBD.map((album: Album) => {
-    album["songs"] = albumSongsMap[album["id"]].map((songId: string) => songsBD.find((song: Song) => song["id"] === songId)) || [];
+  const albumSongs = albumsBD?.map((album: Album) => {
+    album["songs"] = albumSongsMap[album["id"]]?.map((songId: string) => songsBD.find((song: Song) => song["id"] === songId)) || [];
     return album;
   });
 
-  const artistAlbums = artistsBD.map((artist: Artist) => {
+  const artistAlbums = artistsBD?.map((artist: Artist) => {
     artist["albums"] = artistAlbumsMap[artist["id"]]?.map((albumId: string) => albumsBD.find((album: Album) => album["id"] === albumId)) || [];
     return artist;
   });

@@ -13,6 +13,7 @@ use std::{net::IpAddr, time::Duration};
 use stream_download::source::DecodeError;
 use stream_download::storage::temp::TempStorageProvider;
 use stream_download::{Settings, StreamDownload};
+use tauri::{AppHandle, Emitter};
 use tauri_plugin_sql::{Migration, MigrationKind};
 
 const SERVICE_NAME: &'static str = "_googlecast._tcp.local";
@@ -215,20 +216,21 @@ async fn cast_audio(audio_source: String) -> Result<(), String> {
     Ok(())
 }
 
-fn set_media(artist: String, album: String, title: String, cover: String, duration: String) {
+async fn set_media(artist: String, album: String, title: String, cover: String, duration: String) {
     unsafe {
-        let shared_instance = AVAudioSession::shared_instance();
-        shared_instance.activate();
-
         let default = objc2_media_player::MPNowPlayingInfoCenter::defaultCenter();
         objc2_media_player::MPNowPlayingInfoCenter::setNowPlayingInfo(&*default, {
             let keys = &[
                 objc2_media_player::MPMediaItemPropertyArtist,
                 objc2_media_player::MPMediaItemPropertyAlbumTitle,
                 objc2_media_player::MPMediaItemPropertyTitle,
-                objc2_media_player::MPMediaItemPropertyAssetURL,
                 objc2_media_player::MPMediaItemPropertyPlaybackDuration,
+                // objc2_media_player::MPMediaItemPropertyArtwork,
             ];
+            // let image = reqwest::get(cover.clone()).await.unwrap().bytes().await.unwrap();
+            // let data = objc2_foundation::NSData::with_bytes(&image);
+
+
             let owned_objects: &[objc2::rc::Retained<objc2::runtime::AnyObject>] = &[
                 objc2::rc::Retained::into_super(objc2::rc::Retained::into_super(
                     objc2_foundation::NSString::from_str(&artist),
@@ -240,17 +242,58 @@ fn set_media(artist: String, album: String, title: String, cover: String, durati
                     objc2_foundation::NSString::from_str(&title),
                 )),
                 objc2::rc::Retained::into_super(objc2::rc::Retained::into_super(
-                    objc2_foundation::NSString::from_str(&cover),
-                )),
-                objc2::rc::Retained::into_super(objc2::rc::Retained::into_super(
                     objc2_foundation::NSString::from_str(&duration),
                 )),
+                // objc2::rc::Retained::into_super(objc2::rc::Retained::into_super(artwork)),
             ];
             Some(&objc2_foundation::NSDictionary::from_retained_objects(
                 keys,
                 owned_objects,
             ))
         });
+
+        let shared_instance = AVAudioSession::shared_instance();
+        shared_instance.activate();
+    }
+}
+
+fn set_commands(app: AppHandle) {
+    unsafe {
+        let app = Arc::new(app);
+        let app = app.clone();
+        let center = objc2_media_player::MPRemoteCommandCenter::sharedCommandCenter();
+        let app_1 = app.clone();
+        let block_next = Arc::new(block2::RcBlock::new(move |_| {
+            app_1.emit("next-track", ()).unwrap();
+            objc2_media_player::MPRemoteCommandHandlerStatus::Success
+        }));
+
+        center
+            .nextTrackCommand()
+            .addTargetWithHandler(&block_next.clone());
+        center.nextTrackCommand().setEnabled(true);
+
+        let app_2 = app.clone();
+        let block_next = Arc::new(block2::RcBlock::new(move |_| {
+            app_2.emit("pause", ()).unwrap();
+            objc2_media_player::MPRemoteCommandHandlerStatus::Success
+        }));
+
+        center
+            .pauseCommand()
+            .addTargetWithHandler(&block_next.clone());
+        center.pauseCommand().setEnabled(true);
+
+        let app_3 = app.clone();
+        let block_next = Arc::new(block2::RcBlock::new(move |_| {
+            app_3.emit("play", ()).unwrap();
+            objc2_media_player::MPRemoteCommandHandlerStatus::Success
+        }));
+
+        center
+            .playCommand()
+            .addTargetWithHandler(&block_next.clone());
+        center.playCommand().setEnabled(true);
     }
 }
 
@@ -273,7 +316,7 @@ async fn play_audio(
         None => (),
     }
 
-    set_media(artist, album, title, cover, duration);
+    set_media(artist, album, title, cover, duration).await;
 
     let reader = match StreamDownload::new_http(
         audio_source.parse().unwrap(),
@@ -441,6 +484,16 @@ pub fn run() {
     ];
 
     tauri::Builder::default()
+        .setup(|app| {
+            unsafe {
+                log::info!("Enabling remote control");
+                let mtm = objc2::MainThreadMarker::new().expect("must be on the main thread");
+                objc2_ui_kit::UIApplication::sharedApplication(mtm)
+                    .beginReceivingRemoteControlEvents();
+            }
+            set_commands(app.handle().clone());
+            Ok(())
+        })
         .plugin(tauri_plugin_fs::init())
         .plugin(
             tauri_plugin_log::Builder::new()
