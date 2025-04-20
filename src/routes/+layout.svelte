@@ -6,6 +6,7 @@
   import { page } from "$app/state";
   import { settings } from "../stores/settings/store.svelte";
   import Login from "../components/login.svelte";
+  import ContextMenu from "../components/context-menu.svelte";
 
   function handler(event: SwipeCustomEvent) {
     const direction = event.detail.direction;
@@ -94,6 +95,7 @@
       </a>
     </nav>
   {/if}
+  <ContextMenu></ContextMenu>
 </div>
 
 <style scoped>

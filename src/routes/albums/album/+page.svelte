@@ -1,14 +1,14 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
-  import type { Album, Song } from "../../../stores/music/music";
+  import { press, type PressCustomEvent } from "svelte-gestures";
+  import type { Album } from "../../../stores/music/music";
   import { getAlbum, url } from "../../../stores/music/store.svelte";
   import {
     nowPlaying,
     playAlbum,
   } from "../../../stores/now-playing/store.svelte";
-
-  let menu: HTMLElement | undefined = $state();
+  import { contextMenu } from "../../../stores/context-menu/store.svelte";
 
   const albumId = page.url.searchParams.get("id") as string;
 
@@ -22,6 +22,11 @@
 
   const isPlaying = (acappellaId: string) => {
     return acappellaId === nowPlaying.acappellaId && nowPlaying.playing;
+  };
+
+  const longPressHandler = (e: PressCustomEvent) => {
+    console.log(e);
+    contextMenu.opened = true;
   };
 </script>
 
@@ -39,8 +44,13 @@
   <p class="info">{year} ⦁ {songQty} song{songQty > 1 ? "s" : ""}</p>
   <ul>
     {#each album.songs as song}
-      <li class="song" style={`anchor-name: --${song.id};`}>
-        <button class="song-name" onclick={() => playAlbum(song, album)}>
+      <li class="song" style:--id={`--song-${song.acappellaId}`}>
+        <button
+          class="song-name"
+          onclick={() => playAlbum(song, album)}
+          onpress={longPressHandler}
+          use:press={() => ({ timeframe: 300, triggerBeforeFinished: false })}
+        >
           {#if isPlaying(song.acappellaId)}
             <div class="synth">
               <div class="bar1"></div>
@@ -57,7 +67,6 @@
       </li>
     {/each}
   </ul>
-  <div bind:this={menu} class="context-menu"></div>
   <div class="buffer"></div>
 </main>
 
@@ -86,6 +95,10 @@
   .song {
     margin-block: 1rem;
     height: 1.6rem;
+    anchor-name: var(--id);
+    p {
+      user-select: none;
+    }
   }
 
   .song-name {
